@@ -1,0 +1,581 @@
+[
+  {
+    "id": "a1f0c0de00000001",
+    "type": "tab",
+    "label": "Flow Умный офис",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "i_t",
+    "type": "inject",
+    "z": "a1f0c0de00000001",
+    "name": "TEMP-01 каждые 5 секунд",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "5",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "$round($random()*15+20,1)",
+    "payloadType": "jsonata",
+    "x": 200,
+    "y": 200,
+    "wires": [
+      [
+        "c_t"
+      ]
+    ]
+  },
+  {
+    "id": "i_h",
+    "type": "inject",
+    "z": "a1f0c0de00000001",
+    "name": "HUM-01 каждые 5 секунд",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "5",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "$round($random()*40+30,1)",
+    "payloadType": "jsonata",
+    "x": 200,
+    "y": 340,
+    "wires": [
+      [
+        "c_h"
+      ]
+    ]
+  },
+  {
+    "id": "c_t",
+    "type": "change",
+    "z": "a1f0c0de00000001",
+    "name": "Собрать сообщение TEMP-01",
+    "rules": [
+      {
+        "t": "set",
+        "p": "reading",
+        "pt": "msg",
+        "to": "{}",
+        "tot": "json"
+      },
+      {
+        "t": "set",
+        "p": "reading.value",
+        "pt": "msg",
+        "to": "payload",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "reading.sensor_id",
+        "pt": "msg",
+        "to": "TEMP-01",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "reading.zone",
+        "pt": "msg",
+        "to": "server_room",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "reading.timestamp",
+        "pt": "msg",
+        "to": "$millis()",
+        "tot": "jsonata"
+      },
+      {
+        "t": "set",
+        "p": "reading.unit",
+        "pt": "msg",
+        "to": "C",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "reading",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "headers",
+        "pt": "msg",
+        "to": "{\"Content-Type\":\"application/json\"}",
+        "tot": "json"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 510,
+    "y": 200,
+    "wires": [
+      [
+        "h_cr",
+        "h_dr",
+        "sw"
+      ]
+    ]
+  },
+  {
+    "id": "c_h",
+    "type": "change",
+    "z": "a1f0c0de00000001",
+    "name": "Собрать сообщение HUM-01",
+    "rules": [
+      {
+        "t": "set",
+        "p": "reading",
+        "pt": "msg",
+        "to": "{}",
+        "tot": "json"
+      },
+      {
+        "t": "set",
+        "p": "reading.value",
+        "pt": "msg",
+        "to": "payload",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "reading.sensor_id",
+        "pt": "msg",
+        "to": "HUM-01",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "reading.zone",
+        "pt": "msg",
+        "to": "work_area",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "reading.timestamp",
+        "pt": "msg",
+        "to": "$millis()",
+        "tot": "jsonata"
+      },
+      {
+        "t": "set",
+        "p": "reading.unit",
+        "pt": "msg",
+        "to": "%",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "reading",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "headers",
+        "pt": "msg",
+        "to": "{\"Content-Type\":\"application/json\"}",
+        "tot": "json"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 510,
+    "y": 340,
+    "wires": [
+      [
+        "h_cr",
+        "h_dr"
+      ]
+    ]
+  },
+  {
+    "id": "h_cr",
+    "type": "http request",
+    "z": "a1f0c0de00000001",
+    "name": "POST показания - CTRL :8080",
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://192.168.20.3:8080/api/readings",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [],
+    "x": 830,
+    "y": 200,
+    "wires": [
+      [
+        "d_cr"
+      ]
+    ]
+  },
+  {
+    "id": "h_dr",
+    "type": "http request",
+    "z": "a1f0c0de00000001",
+    "name": "POST показания - DB :8081",
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://192.168.10.5:8081/api/readings",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [],
+    "x": 830,
+    "y": 340,
+    "wires": [
+      [
+        "d_dr"
+      ]
+    ]
+  },
+  {
+    "id": "d_cr",
+    "type": "debug",
+    "z": "a1f0c0de00000001",
+    "name": "Ответ CTRL (показания) - 200",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1160,
+    "y": 200,
+    "wires": []
+  },
+  {
+    "id": "d_dr",
+    "type": "debug",
+    "z": "a1f0c0de00000001",
+    "name": "Ответ DB (показания) - 200",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1160,
+    "y": 340,
+    "wires": []
+  },
+  {
+    "id": "sw",
+    "type": "switch",
+    "z": "a1f0c0de00000001",
+    "name": "Температура > 30?",
+    "property": "reading.value",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "gt",
+        "v": "30",
+        "vt": "num"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 780,
+    "y": 560,
+    "wires": [
+      [
+        "f_on"
+      ],
+      [
+        "f_off"
+      ]
+    ]
+  },
+  {
+    "id": "f_on",
+    "type": "change",
+    "z": "a1f0c0de00000001",
+    "name": "FAN ON (fan.state=ON)",
+    "rules": [
+      {
+        "t": "set",
+        "p": "fan.state",
+        "pt": "msg",
+        "to": "ON",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "fan.actuator_id",
+        "pt": "msg",
+        "to": "FAN-01",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "fan.zone",
+        "pt": "msg",
+        "to": "server_room",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "fan.mode",
+        "pt": "msg",
+        "to": "auto",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "fan.timestamp",
+        "pt": "msg",
+        "to": "$millis()",
+        "tot": "jsonata"
+      },
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "fan",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "headers",
+        "pt": "msg",
+        "to": "{\"Content-Type\":\"application/json\"}",
+        "tot": "json"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1000,
+    "y": 520,
+    "wires": [
+      [
+        "h_ca",
+        "h_da"
+      ]
+    ]
+  },
+  {
+    "id": "f_off",
+    "type": "change",
+    "z": "a1f0c0de00000001",
+    "name": "FAN OFF (fan.state=OFF)",
+    "rules": [
+      {
+        "t": "set",
+        "p": "fan.state",
+        "pt": "msg",
+        "to": "OFF",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "fan.actuator_id",
+        "pt": "msg",
+        "to": "FAN-01",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "fan.zone",
+        "pt": "msg",
+        "to": "server_room",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "fan.mode",
+        "pt": "msg",
+        "to": "auto",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "fan.timestamp",
+        "pt": "msg",
+        "to": "$millis()",
+        "tot": "jsonata"
+      },
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "fan",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "headers",
+        "pt": "msg",
+        "to": "{\"Content-Type\":\"application/json\"}",
+        "tot": "json"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1000,
+    "y": 600,
+    "wires": [
+      [
+        "h_ca",
+        "h_da"
+      ]
+    ]
+  },
+  {
+    "id": "h_ca",
+    "type": "http request",
+    "z": "a1f0c0de00000001",
+    "name": "POST вентилятор - CTRL :8080",
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://192.168.20.3:8080/api/actuators",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [],
+    "x": 1330,
+    "y": 520,
+    "wires": [
+      [
+        "d_ca"
+      ]
+    ]
+  },
+  {
+    "id": "h_da",
+    "type": "http request",
+    "z": "a1f0c0de00000001",
+    "name": "POST вентилятор - DB :8081",
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "http://192.168.10.5:8081/api/actuators",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [],
+    "x": 1330,
+    "y": 600,
+    "wires": [
+      [
+        "d_da"
+      ]
+    ]
+  },
+  {
+    "id": "d_ca",
+    "type": "debug",
+    "z": "a1f0c0de00000001",
+    "name": "Ответ CTRL (вентилятор) - 200",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1660,
+    "y": 520,
+    "wires": []
+  },
+  {
+    "id": "d_da",
+    "type": "debug",
+    "z": "a1f0c0de00000001",
+    "name": "Ответ DB (вентилятор) - 200",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1660,
+    "y": 600,
+    "wires": []
+  },
+  {
+    "id": "catch",
+    "type": "catch",
+    "z": "a1f0c0de00000001",
+    "name": "Ошибки вкладки",
+    "scope": null,
+    "uncaught": false,
+    "x": 460,
+    "y": 720,
+    "wires": [
+      [
+        "d_err"
+      ]
+    ]
+  },
+  {
+    "id": "d_err",
+    "type": "debug",
+    "z": "a1f0c0de00000001",
+    "name": "Ошибка - раскрыть msg.error",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 750,
+    "y": 720,
+    "wires": []
+  }
+]
