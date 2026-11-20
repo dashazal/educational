@@ -36,9 +36,20 @@
 ```text
 educational/
 ├── README.md
-├── start-nodered.bat      
-├── env.bat                
-├── .gitignore
+├── dashboard.json     
+├── flows smart office.json              
+├── receiver.js
+│
+├── 6/
+│   ├── compose.yml
+│   ├── index.html
+│   ├── inspect_db.ру           
+│   └── server.ру
+│
+├── receiver/
+│   ├── compose.yml
+│   ├── dashboard.json           
+│   └── receiver.js
 │
 ├── Task_1/
 │   ├── image.png
