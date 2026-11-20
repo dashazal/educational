@@ -31,6 +31,29 @@
 - **draw.io** — схемы помещений
 - **Git + GitHub** — контроль версий
 
+## Сетевые адреса и порты
+
+| Компонент | Адрес | Порт / путь | Назначение |
+|---|---|---|---|
+| Node-RED | `http://192.168.20.11:1880` | `1880` | Редактор потоков |
+| CTRL-01 receiver | `http://192.168.20.12:8080` | `/health`, `/api/readings`, `/api/actuators` | Приём показаний и событий вентилятора |
+| DB history | `http://192.168.20.10:8081` | `/`, `/health`, `/api/history` | Страница истории и API |
+| Prometheus | `http://192.168.20.13:9090` | `9090` | Проверка целей и запрос метрик |
+| Grafana | `http://192.168.20.13:3000` | `3000` | Дашборды и правила оповещений |
+
+## Схема обмена данными
+
+1. Потоки Node-RED на IOT-01 формируют сообщения `TEMP-01` и `HUM-01`.
+2. Показания отправляются HTTP POST-запросами:
+   - на CTRL-01: `http://192.168.20.12:8080/api/readings`;
+   - на DB: `http://192.168.20.10:8081/api/readings`.
+3. Поток температуры проверяет условие `температура > 30 °C`:
+   - выше 30 °C — формируется состояние `FAN-01 = ON`;
+   - 30 °C и ниже — формируется состояние `FAN-01 = OFF`.
+4. Состояние вентилятора отправляется на CTRL-01 (`/api/actuators`) и DB (`/api/actuators`).
+5. Сервис DB сохраняет показания и события вентилятора в SQLite. Страница истории доступна на DB по адресу `http://192.168.20.10:8081/`.
+6. Prometheus собирает метрики с настроенной цели `office-controller`, а Grafana отображает данные и обрабатывает правила оповещений. Фактические scrape-настройки и состояние `UP` должны подтверждаться на MON-01.
+
 ## Структура репозитория
 
 ```text
@@ -39,6 +62,7 @@ educational/
 ├── dashboard.json     
 ├── flows smart office.json              
 ├── receiver.js
+├── инструкция пользователя.pdf
 │
 ├── 6/
 │   ├── compose.yml
@@ -86,4 +110,38 @@ educational/
     ├── d41ed0ad-34d2-46d4-8a24-aef16487cc0f_imagine.png
     ├── email.png   
     └── Задание №7.pdf
+```
+## Запуск сервисов
+
+Команды ниже соответствуют расположению Compose-файлов в репозитории. Выполняйте их на соответствующих ВМ из каталогов проекта.
+
+### CTRL-01 — HTTP-приёмник
+
+```bash
+cd "Для работы 5"
+docker compose -f compose.yml up -d
+docker compose -f compose.yml ps
+docker compose -f compose.yml logs --tail=50 receiver
+```
+
+Проверка доступности приёмника:
+
+```bash
+curl -i http://127.0.0.1:8080/health
+```
+
+### DB — SQLite и история
+
+```bash
+cd "Для работы 6"
+docker compose -f compose.yml up -d
+docker compose -f compose.yml ps
+docker compose -f compose.yml logs --tail=50 storage
+```
+
+Проверка сервиса:
+
+```bash
+curl -i http://127.0.0.1:8081/health
+curl -s http://127.0.0.1:8081/api/summary
 ```
