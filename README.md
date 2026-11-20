@@ -145,3 +145,11 @@ docker compose -f compose.yml logs --tail=50 storage
 curl -i http://127.0.0.1:8081/health
 curl -s http://127.0.0.1:8081/api/summary
 ```
+### MON-01 — Prometheus и Grafana
+
+Запуск служб выполняется средствами настроенной ОС и существующей конфигурации MON-01. Перед запуском проверьте фактические имена служб и их состояние:
+
+```bash
+systemctl status prometheus
+systemctl status grafana-server
+```
